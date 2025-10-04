@@ -18,7 +18,7 @@ export default function App() {
       <HeroCover />
 
       <main className="relative z-10">
-        <section className="container mx-auto px-4 py-16">
+        <section id="play" className="container mx-auto px-4 py-16">
           <div className="mb-10">
             <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">Interactive Lava Lamp</h2>
             <p className="text-zinc-300 mt-2 max-w-2xl">Blobs of goo float, collide, and visually merge using a metaball-inspired rendering on HTML Canvas. Tweak parameters live and play with the physics.</p>

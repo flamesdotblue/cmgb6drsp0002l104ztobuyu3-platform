@@ -17,6 +17,10 @@ export default function LavaLamp({ count = 8, speed = 1, hue = 285, saturation =
 
     const state = { w: 0, h: 0 };
 
+    function rand(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
     const makeBlob = () => {
       const r = rand(30, 80);
       return {
@@ -28,10 +32,6 @@ export default function LavaLamp({ count = 8, speed = 1, hue = 285, saturation =
         m: r * r * Math.PI,
       };
     };
-
-    function rand(min, max) {
-      return Math.random() * (max - min) + min;
-    }
 
     function resize() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -51,7 +51,6 @@ export default function LavaLamp({ count = 8, speed = 1, hue = 285, saturation =
       const arr = blobsRef.current;
       while (arr.length < target) arr.push(makeBlob());
       while (arr.length > target) arr.pop();
-      // Adjust speed smoothly by scaling velocity
       const speedScale = Math.max(0.15, speed);
       for (const b of arr) {
         const len = Math.hypot(b.vx, b.vy) || 1;
@@ -68,10 +67,8 @@ export default function LavaLamp({ count = 8, speed = 1, hue = 285, saturation =
 
       for (let i = 0; i < blobs.length; i++) {
         const b = blobs[i];
-        // gentle gravity-like vertical drift
         b.vy += 0.0008 * dt * (Math.sin(i + performance.now() * 0.0002) * 0.5);
 
-        // mouse attraction when held
         if (mouse.down) {
           const dx = mouse.x - b.x;
           const dy = mouse.y - b.y;
@@ -81,18 +78,15 @@ export default function LavaLamp({ count = 8, speed = 1, hue = 285, saturation =
           b.vy += (dy / dist) * force;
         }
 
-        // integrate
         b.x += b.vx * dt;
         b.y += b.vy * dt;
 
-        // boundary collisions
         if (b.x < b.r) { b.x = b.r; b.vx *= -0.95; }
         if (b.x > w - b.r) { b.x = w - b.r; b.vx *= -0.95; }
         if (b.y < b.r) { b.y = b.r; b.vy *= -0.95; }
         if (b.y > h - b.r) { b.y = h - b.r; b.vy *= -0.95; }
       }
 
-      // simple inelastic collisions (pairwise)
       for (let i = 0; i < blobs.length; i++) {
         for (let j = i + 1; j < blobs.length; j++) {
           const a = blobs[i];
@@ -100,18 +94,16 @@ export default function LavaLamp({ count = 8, speed = 1, hue = 285, saturation =
           const dx = b.x - a.x;
           const dy = b.y - a.y;
           const dist = Math.hypot(dx, dy);
-          const minDist = a.r * 0.85 + b.r * 0.85; // allow overlaps to enhance goo
+          const minDist = a.r * 0.85 + b.r * 0.85;
           if (dist > 0 && dist < minDist) {
             const nx = dx / dist;
             const ny = dy / dist;
             const overlap = minDist - dist;
             const totalMass = a.m + b.m;
-            // separate proportionally to mass
             a.x -= nx * (overlap * (b.m / totalMass));
             a.y -= ny * (overlap * (b.m / totalMass));
             b.x += nx * (overlap * (a.m / totalMass));
             b.y += ny * (overlap * (a.m / totalMass));
-            // exchange velocities along normal (inelastic)
             const rvx = b.vx - a.vx;
             const rvy = b.vy - a.vy;
             const velAlongNormal = rvx * nx + rvy * ny;
@@ -135,11 +127,9 @@ export default function LavaLamp({ count = 8, speed = 1, hue = 285, saturation =
       const { w, h } = state;
       ctx.clearRect(0, 0, w, h);
 
-      // background
       ctx.fillStyle = '#050509';
       ctx.fillRect(0, 0, w, h);
 
-      // Goo pass: blurred colored circles with additive blending
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
       ctx.filter = `blur(${Math.max(6, glow)}px)`;
@@ -156,12 +146,18 @@ export default function LavaLamp({ count = 8, speed = 1, hue = 285, saturation =
       }
       ctx.restore();
 
-      // Highlight/specular pass for a metallic sheen
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
       ctx.filter = 'blur(6px)';
       for (const b of blobsRef.current) {
-        const grad2 = ctx.createRadialGradient(b.x - b.r * 0.3, b.y - b.r * 0.3, 0, b.x - b.r * 0.3, b.y - b.r * 0.3, b.r);
+        const grad2 = ctx.createRadialGradient(
+          b.x - b.r * 0.3,
+          b.y - b.r * 0.3,
+          0,
+          b.x - b.r * 0.3,
+          b.y - b.r * 0.3,
+          b.r
+        );
         grad2.addColorStop(0, 'hsla(0 0% 100% / 0.35)');
         grad2.addColorStop(1, 'hsla(0 0% 100% / 0)');
         ctx.fillStyle = grad2;
@@ -171,8 +167,14 @@ export default function LavaLamp({ count = 8, speed = 1, hue = 285, saturation =
       }
       ctx.restore();
 
-      // Soft vignette for depth
-      const vg = ctx.createRadialGradient(w * 0.5, h * 0.55, Math.min(w, h) * 0.3, w * 0.5, h * 0.55, Math.max(w, h) * 0.75);
+      const vg = ctx.createRadialGradient(
+        w * 0.5,
+        h * 0.55,
+        Math.min(w, h) * 0.3,
+        w * 0.5,
+        h * 0.55,
+        Math.max(w, h) * 0.75
+      );
       vg.addColorStop(0, 'hsla(0 0% 0% / 0)');
       vg.addColorStop(1, 'hsla(0 0% 0% / 0.55)');
       ctx.fillStyle = vg;
@@ -202,8 +204,8 @@ export default function LavaLamp({ count = 8, speed = 1, hue = 285, saturation =
 
     const onPointerMove = (e) => {
       const rect = canvas.getBoundingClientRect();
-      mouseRef.current.x = (e.clientX - rect.left);
-      mouseRef.current.y = (e.clientY - rect.top);
+      mouseRef.current.x = e.clientX - rect.left;
+      mouseRef.current.y = e.clientY - rect.top;
     };
     const onPointerDown = (e) => {
       mouseRef.current.down = true;
@@ -211,7 +213,6 @@ export default function LavaLamp({ count = 8, speed = 1, hue = 285, saturation =
     };
     const onPointerUp = () => { mouseRef.current.down = false; };
     const onClick = (e) => {
-      // Add a new blob where clicked
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;

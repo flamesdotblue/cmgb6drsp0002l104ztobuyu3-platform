@@ -13,8 +13,8 @@ export default function HeroCover() {
       <div className="relative z-10 h-full flex items-center justify-center px-6">
         <div className="max-w-3xl text-center">
           <h1 className="font-instrument text-4xl md:text-6xl font-semibold tracking-tight leading-tight">
-            <em className="not-italic bg-gradient-to-r from-fuchsia-400 via-pink-400 to-violet-400 bg-clip-text text-transparent italic">Liquid Light</em>:
-            <span className="block md:inline md:ml-2">Interactive Lava Lamp</span>
+            <span className="italic bg-gradient-to-r from-fuchsia-400 via-pink-400 to-violet-400 bg-clip-text text-transparent">Liquid Light</span>
+            <span className="not-italic text-white">: Interactive Lava Lamp</span>
           </h1>
           <p className="mt-4 text-lg md:text-xl text-zinc-300">
             Float, merge, and play with digital goo. <em className="italic text-fuchsia-300/90">Real-time metaballs</em> meet vibrant, futuristic vibes.
@@ -36,7 +36,7 @@ export default function HeroCover() {
         </div>
       </div>
 
-      <div id="play" className="absolute bottom-4 left-1/2 -translate-x-1/2 text-zinc-300/80 text-sm">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-zinc-300/80 text-sm">
         Scroll to explore
       </div>
     </header>
